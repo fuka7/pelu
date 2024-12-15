@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notificaciones en Tiempo Real</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script> <!-- Icono campanita -->
+    <style>
+        .campanita {
+            position: relative;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .contador {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: red;
+            color: rgb(0, 0, 0);
+            border-radius: 50%;
+            padding: 5px;
+            font-size: 12px;
+            display: none; /* Oculto por defecto */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="container nav-content">
+                <a href="index.html" class="logo">Peluquería Talcahuano</a>
+                <div class="campanita" onclick="abrirNotificaciones()">
+                    <i class="fas fa-bell"></i>
+                    <span id="contador" class="contador">0</span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="notificaciones" class="section">
+            <div class="container">
+                <h2 class="section-title">Notificaciones</h2>
+                <div id="notificacionesDiv">
+                    <!-- Aquí se mostrarán las notificaciones -->
+                </div>
+                <button id="btnLimpiar" class="btn">Limpiar Notificaciones</button>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>© 2024 Peluquería Talcahuano. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const notificacionesDiv = document.getElementById("notificacionesDiv");
+            const contador = document.getElementById("contador");
+            const btnLimpiar = document.getElementById("btnLimpiar");
+
+            // Cargar notificaciones desde localStorage
+            function cargarNotificaciones() {
+                const notificaciones = JSON.parse(localStorage.getItem("notificaciones")) || [];
+                contador.textContent = notificaciones.length;
+                contador.style.display = notificaciones.length > 0 ? "block" : "none";
+
+                if (notificaciones.length === 0) {
+                    notificacionesDiv.innerHTML = "<p>No tienes notificaciones.</p>";
+                } else {
+                    notificacionesDiv.innerHTML = notificaciones
+                        .map((n, index) => `
+                            <div class="notification" data-index="${index}">
+                                <p>${n.mensaje}</p>
+                                <button class="btn btn-small" onclick="borrarNotificacion(${index})">Eliminar</button>
+                            </div>
+                        `)
+                        .join("");
+                }
+            }
+
+            // Borrar una notificación
+            window.borrarNotificacion = (index) => {
+                const notificaciones = JSON.parse(localStorage.getItem("notificaciones")) || [];
+                notificaciones.splice(index, 1);
+                localStorage.setItem("notificaciones", JSON.stringify(notificaciones));
+                cargarNotificaciones();
+            };
+
+            // Limpiar todas las notificaciones
+            btnLimpiar.addEventListener("click", () => {
+                localStorage.setItem("notificaciones", JSON.stringify([]));
+                cargarNotificaciones();
+                alert("Todas las notificaciones han sido eliminadas.");
+            });
+
+            // Escuchar cambios en localStorage en tiempo real
+            window.addEventListener("storage", (event) => {
+                if (event.key === "notificaciones") {
+                    cargarNotificaciones();
+                }
+            });
+
+            // Cargar notificaciones al iniciar
+            cargarNotificaciones();
+        });
+
+        // Abrir página de notificaciones
+        function abrirNotificaciones() {
+            window.location.href = "notificaciones.html";
+        }
+    </script>
+</body>
+</html>
